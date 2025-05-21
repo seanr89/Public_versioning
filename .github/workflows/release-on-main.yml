@@ -17,43 +17,58 @@ on:
       - main
 
 jobs:
-  release:
+  increment-minor-version:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up Git user
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Get latest tag
-        id: get_tag
-        run: |
-          git fetch --tags
-          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          echo "latest_tag=$latest_tag" >> $GITHUB_OUTPUT
-
-      - name: Calculate next minor version
-        id: next_version
-        run: |
-          latest_tag=${{ steps.get_tag.outputs.latest_tag }}
-          version=${latest_tag#v}
-          # Ensure version is in the form X.Y.Z, pad with zeros if needed
-          IFS='.' read -r major minor patch <<< "$version"
-          if [ -z "$major" ]; then major=0; fi
-          if [ -z "$minor" ]; then minor=0; fi
-          if [ -z "$patch" ]; then patch=0; fi
-          minor=$((minor+1))
-          next_version="v$major.$minor.0"
-          echo "next_version=$next_version" >> $GITHUB_OUTPUT
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.next_version.outputs.next_version }}
-          name: Release ${{ steps.next_version.outputs.next_version }}
-          generate_release_notes: true
+          fetch-depth: 0 # Fetch all history and tags to correctly determine the latest version
+
+      - name: Get latest tag and increment minor version
+        id: get_version
+        run: |
+          # Get the latest tag, e.g., 'v1.2.3'
+          # If no tags exist, default to 'v0.0.0'
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Latest existing tag: $LATEST_TAG"
+
+          # Extract major, minor, and patch numbers
+          # Remove 'v' prefix for parsing
+          VERSION_NUMBERS=$(echo $LATEST_TAG | sed 's/^v//')
+          MAJOR=$(echo $VERSION_NUMBERS | cut -d. -f1)
+          MINOR=$(echo $VERSION_NUMBERS | cut -d. -f2)
+          PATCH=$(echo $VERSION_NUMBERS | cut -d. -f3)
+
+          # Increment the minor version
+          NEW_MINOR=$((MINOR + 1))
+          NEW_TAG="v${MAJOR}.${NEW_MINOR}.0" # Reset patch to 0 for a new minor release
+
+          echo "New tag will be: $NEW_TAG"
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+
+      - name: Create and push new tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NEW_TAG=${{ steps.get_version.outputs.new_tag }}
+          echo "Creating tag $NEW_TAG"
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
+
+      - name: Create GitHub Release (Optional)
+        # This step is optional but highly recommended to create a formal release on GitHub
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') # Only run if a tag was pushed (which our previous step does)
+        with:
+          tag_name: ${{ steps.get_version.outputs.new_tag }}
+          name: Release ${{ steps.get_version.outputs.new_tag }}
+          body: |
+            ## New Minor Release
+
+            This release includes minor version updates.
+            For details, please see the commit history since the last release.
+          draft: false
+          prerelease: false
