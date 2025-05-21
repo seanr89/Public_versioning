@@ -40,7 +40,11 @@ jobs:
         run: |
           latest_tag=${{ steps.get_tag.outputs.latest_tag }}
           version=${latest_tag#v}
+          # Ensure version is in the form X.Y.Z, pad with zeros if needed
           IFS='.' read -r major minor patch <<< "$version"
+          if [ -z "$major" ]; then major=0; fi
+          if [ -z "$minor" ]; then minor=0; fi
+          if [ -z "$patch" ]; then patch=0; fi
           minor=$((minor+1))
           next_version="v$major.$minor.0"
           echo "next_version=$next_version" >> $GITHUB_OUTPUT
