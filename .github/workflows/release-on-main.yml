@@ -1,5 +1,13 @@
 name: Release on main push
 
+## This workflow is triggered on pushes to the main branch.
+## It creates a new release with an incremented minor version number
+## based on the latest tag found in the repository.
+## The release is created using the softprops/action-gh-release action.
+# The workflow uses the GITHUB_TOKEN secret to authenticate with the GitHub API.
+# The workflow checks out the code, sets up Git user information,
+# fetches the latest tag, calculates the next minor version,
+# and creates a new release with the specified tag name and release notes.
 permissions:
   contents: write
 
