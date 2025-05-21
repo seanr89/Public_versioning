@@ -1,5 +1,8 @@
 name: Release on main push
 
+permissions:
+  contents: write
+
 on:
   push:
     branches:
