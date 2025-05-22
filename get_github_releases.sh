@@ -56,6 +56,7 @@ CURL_CMD="${CURL_CMD} -H \"Accept: application/vnd.github.v3+json\""
 
 HTTP_RESPONSE=$(mktemp)
 HTTP_CODE=$(${CURL_CMD} "${API_URL}" -w "%{http_code}" -o "${HTTP_RESPONSE}")
+echo "HTTP Status Code: ${HTTP_CODE}"
 
 if [ "${HTTP_CODE}" -eq 200 ]; then
     RELEASES=$(jq -r '.[].tag_name' "${HTTP_RESPONSE}")
