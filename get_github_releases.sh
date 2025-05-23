@@ -54,41 +54,27 @@ CURL_CMD="${CURL_CMD} -H \"Accept: application/vnd.github.v3+json\""
 # If the API returns an error (e.g., repo not found), jq might fail or output 'null'.
 # We also check if the http_code is 200.
 
-HTTP_RESPONSE=$(mktemp)
-HTTP_CODE=$(${CURL_CMD} "${API_URL}" -w "%{http_code}" -o "${HTTP_RESPONSE}")
-echo "HTTP Status Code: ${HTTP_CODE}"
+response=$(curl -s --include "${API_URL}")
 
-if [ "${HTTP_CODE}" -eq 200 ]; then
-    RELEASES=$(jq -r '.[].tag_name' "${HTTP_RESPONSE}")
+# Extract the status code (assuming HTTP/1.1 or HTTP/2)
+status_line=$(head -n 1 <<< "$response")
+status_code=$(awk '{print $2}' <<< "$status_line")
 
-    if [ -z "$RELEASES" ]; then
-        echo "No releases found for ${OWNER}/${REPO}."
-        # Check if it's an empty array vs an error in jq parsing or API structure change
-        IS_EMPTY_ARRAY=$(jq 'if type == "array" and length == 0 then true else false end' "${HTTP_RESPONSE}")
-        if [ "${IS_EMPTY_ARRAY}" != "true" ]; then
-             echo "Note: The repository might exist but have no releases, or there was an issue parsing the release data."
-        fi
-    else
-        echo "Release versions:"
-        echo "${RELEASES}"
-    fi
+# Extract the body (everything after the headers - an empty line usually separates headers and body)
+body=$(sed '1,/^\r*$/d' <<< "$response")
+
+echo "Status Code: $status_code"
+# echo "Body: $body"
+
+# exit 1
+
+
+if [ "${status_code}" -eq 200 ]; then
+    echo "Release versions:"
+    echo "${body}" | jq -r '.[].tag_name'
 else
     echo "Error fetching releases from GitHub API."
-    echo "HTTP Status Code: ${HTTP_CODE}"
-    # Display error message from GitHub API if available and not empty
-    if [ -s "${HTTP_RESPONSE}" ]; then
-        echo "Response:"
-        # Try to pretty-print if it's JSON, otherwise cat
-        if jq -e . "${HTTP_RESPONSE}" > /dev/null 2>&1; then
-            jq . "${HTTP_RESPONSE}"
-        else
-            cat "${HTTP_RESPONSE}"
-        fi
-    fi
-    echo ""
-    echo "Please check the owner, repository name, and your network connection."
-    echo "For private repositories, or to avoid rate limiting, you might need to use a GitHub Personal Access Token."
-    echo "See the GITHUB_TOKEN variable in the script."
+    echo "Status Code: ${status_code}"
 fi
 
 # Clean up temporary file
