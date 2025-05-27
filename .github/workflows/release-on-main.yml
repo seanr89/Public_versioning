@@ -66,9 +66,7 @@ jobs:
           tag_name: ${{ steps.get_version.outputs.new_tag }}
           name: Release ${{ steps.get_version.outputs.new_tag }}
           body: |
-            ## New Minor Release
-
-            This release includes minor version updates.
-            For details, please see the commit history since the last release.
+            ## New Minor Releasem - ${{ steps.get_version.outputs.new_tag }}
+            This is a new minor release of the project.
           draft: false
           prerelease: false
