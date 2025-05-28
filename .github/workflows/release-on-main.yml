@@ -67,6 +67,6 @@ jobs:
           name: Release ${{ steps.get_version.outputs.new_tag }}
           body: |
             ## New Minor Releasem - ${{ steps.get_version.outputs.new_tag }}
-            This is a new minor release of the project.
+            ${{ github.event.head_commit.message }}
           draft: false
           prerelease: false
