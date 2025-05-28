@@ -15,6 +15,7 @@ export async function fetchGitHubReleases(
   pageCount: number = 1
 ): Promise<any[]> {
   const allReleases: any[] = [];
+  // we want to fetch all releases, so we loop through the pages
   for (let page = 1; page <= pageCount; page++) {
     const releases = await new Promise<any[]>((resolve, reject) => {
       const options: https.RequestOptions = {
