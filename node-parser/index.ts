@@ -9,8 +9,15 @@ const maxVersion = '0.6.0';
 const repoName = 'public_versioning';
 const ownerName = 'seanr89';
 
+// const [, , ownerName = 'seanr89', repoName = 'public_versioning', minVersion = '0.2.0', maxVersion = '0.6.0'] = process.argv;
 
-fetchGitHubReleases(ownerName, repoName, undefined, 2).then(
+/**
+ * Fetches GitHub releases for a given repository and filters them based on version range.
+ * The filtered releases are then written to a JSON file.
+ * @param {string} ownerName - The GitHub username or organization name.
+ * @param {string} repoName - The name of the GitHub repository.
+ */
+fetchGitHubReleases(ownerName, repoName, undefined, 5).then(
     (releases: GitRelease[]) => {
         const validVersions: GitReleaseResponse[] = [];
         releases.forEach((release) => {

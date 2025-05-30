@@ -1,3 +1,12 @@
+
+/**
+ * Converts a version string to a numeric representation.
+ * @param version The version string to convert, e.g., "1.2.3".
+ *                It can have up to 3 parts, e.g., "1.2.3", "1.2", or "1".
+ *                The first part is the major version, the second part is the minor version,
+ *                and the third part is the patch version.
+ * @returns The numeric representation of the version.
+ */
 export function versionToNumber(version: string): number {
     const parts = version.split(".").map(Number);
     let number = 0;
