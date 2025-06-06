@@ -31,3 +31,12 @@ export function isVersionInRange(version: string, lowerBound: string,
     const upperBoundNumber = versionToNumber(upperBound);
     return versionNumber >= lowerBoundNumber && versionNumber <= upperBoundNumber;
 }
+
+export function getLatestVersion(versions: string[]): string {
+    if (versions.length === 0) {
+        return "";
+    }
+    return versions.reduce((latest, current) => {
+        return versionToNumber(current) > versionToNumber(latest) ? current : latest;
+    });
+}   
