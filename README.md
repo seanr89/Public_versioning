@@ -1,6 +1,8 @@
 # Public_versioning
 app to test public local versioning and git commands
 
+[![Release on main push](https://github.com/seanr89/Public_versioning/actions/workflows/release-on-main.yml/badge.svg)](https://github.com/seanr89/Public_versioning/actions/workflows/release-on-main.yml)
+
 ## node-parser package
 
 This directory contains TypeScript code to fetch GitHub release data and write it to a JSON file.

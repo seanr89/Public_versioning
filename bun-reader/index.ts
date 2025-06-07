@@ -13,7 +13,7 @@ import { isVersionInRange, getLatestVersion } from "./versionchecker";
 console.log("Hello via Bun!");
 
 const minVersion = '0.2.0';
-const maxVersion = '0.6.0';
+const maxVersion = '0.9.0';
 
 const repoName = 'public_versioning';
 const ownerName = 'seanr89';
@@ -26,6 +26,9 @@ const ownerName = 'seanr89';
  */
 fetchGitHubReleases(ownerName, repoName, undefined, 5).then(
     (releases: GitRelease[]) => {
+
+        const version = getLatestVersion(releases.map(release => release.tag_name.replace('v', '')));
+        
         const validVersions: GitReleaseResponse[] = [];
         releases.forEach((release) => {
 
@@ -42,13 +45,8 @@ fetchGitHubReleases(ownerName, repoName, undefined, 5).then(
 
         });
 
-        console.log(`Found ${validVersions.length} valid versions between ${minVersion} and ${maxVersion} with patch 0.`);
+        console.log(`Found ${validVersions.length} valid versions between ${minVersion} and ${maxVersion}`);
         ReleaseWriter.writeToFile(validVersions, `./${repoName}_${minVersion}_${maxVersion}.json`);
-
-        let latestVersion = validVersions.reduce((latest, current) => {
-            return current.tag_name > latest.tag_name ? current : latest;
-        }
-        );
-        console.log(`Latest version found: ${latestVersion.tag_name} published at ${latestVersion.published_at}`);
+        console.log(`Latest version found: ${version}`);
     }
 ).catch(console.error);
