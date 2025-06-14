@@ -21,8 +21,6 @@ const ownerName = 'seanr89';
 /**
  * Fetches GitHub releases for a given repository and filters them based on version range.
  * The filtered releases are then written to a JSON file.
- * @param {string} ownerName - The GitHub username or organization name.
- * @param {string} repoName - The name of the GitHub repository.
  */
 fetchGitHubReleases(ownerName, repoName, undefined, 5).then(
     (releases: GitRelease[]) => {
